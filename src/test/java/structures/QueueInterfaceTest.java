@@ -13,145 +13,204 @@ import config.Configuration;
 
 public class QueueInterfaceTest {
 
-    private QueueInterface<String> queue;
+    private QueueInterface<String> strQueue;
+    private QueueInterface<Integer> intQueue;
 
     @BeforeEach
     public void setup() {
-        queue = Configuration.getQueueImplementation();
-        assertNotNull(queue,
+        strQueue = Configuration.getQueueImplementation();
+        intQueue = Configuration.getQueueImplementation();
+        assertNotNull(strQueue,
                 "You have not set your queue in the configuration class.");
         QueueInterface<String> queue2 = Configuration.getQueueImplementation();
-        assertNotEquals(queue, queue2,
+        assertNotEquals(strQueue, queue2,
                 "The getQueueImplementation method must return a NEW queue");
     }
 
     @Test
-    public void testEnqueueSize() {
-        queue.enqueue("One");
-        assertEquals(1, queue.size());
-        queue.enqueue("Two");
-        assertEquals(2, queue.size());
-        queue.enqueue("Three");
-        assertEquals(3, queue.size());
-        queue.enqueue("Four");
-        assertEquals(4, queue.size());
+    public void testEnqueueSizeString() {
+        strQueue.enqueue("One");
+        assertEquals(1, strQueue.size());
+        strQueue.enqueue("Two");
+        assertEquals(2, strQueue.size());
+        strQueue.enqueue("Three");
+        assertEquals(3, strQueue.size());
+        strQueue.enqueue("Four");
+        assertEquals(4, strQueue.size());
     }
 
     @Test
-    public void testEnqueueSize2() {
-        QueueInterface<Integer> queue = Configuration.getQueueImplementation();
-        int max = 100000;
-        for(int i = 0; i < max; i ++){
-            assertEquals(i, queue.size());
-            queue.enqueue(i);
-        }
+    public void testEnqueueSizeInteger() {
+        intQueue.enqueue(1);
+        assertEquals(1, intQueue.size());
+        intQueue.enqueue(2);
+        assertEquals(2, intQueue.size());
+        intQueue.enqueue(3);
+        assertEquals(3, intQueue.size());
+        intQueue.enqueue(4);
+        assertEquals(4, intQueue.size());
     }
 
     @Test
-    public void testEnqueueDequeueSize(){
-        queue.enqueue("One");
-        assertEquals(1, queue.size());
-        queue.enqueue("Two");
-        assertEquals(2, queue.size());
-        queue.enqueue("Three");
-        assertEquals(3, queue.size());
-        queue.enqueue("Four");
-        assertEquals(4, queue.size());
-        assertEquals("One", queue.dequeue());
-        assertEquals(3, queue.size());
-        assertEquals("Two", queue.dequeue());
-        assertEquals(2, queue.size());
-        assertEquals("Three", queue.dequeue());
-        assertEquals(1, queue.size());
-        assertEquals("Four", queue.dequeue());
-        assertEquals(0, queue.size());
+    public void testEnqueuePeekString() {
+        strQueue.enqueue("One");
+        assertEquals("One", strQueue.peek());
+        strQueue.enqueue("Two");
+        assertEquals("One", strQueue.peek());
+        strQueue.enqueue("Three").enqueue("Four");
+        assertEquals("One", strQueue.peek());
     }
 
     @Test
-    public void testEnqueueDequeueSize2(){
-        QueueInterface<Integer> queue = Configuration.getQueueImplementation();
+    public void testEnqueuePeekInteger() {
+        intQueue.enqueue(1);
+        assertEquals(1, intQueue.peek());
+        intQueue.enqueue(2);
+        assertEquals(1, intQueue.peek());
+        intQueue.enqueue(3).enqueue(4);
+        assertEquals(1, intQueue.peek());
+    }
+
+    @Test
+    public void testEnqueueSizeLarge() {
         //int max = 10;
-        int max = 100000;
-        for(int i = 0; i < max; i++){
-            assertEquals(i, queue.size());
-            queue.enqueue(i);
-            System.out.println(queue.toString());
+        int max = 1000000;
+        for(int i = 0; i < max; i ++){
+            assertEquals(i, intQueue.size());
+            intQueue.enqueue(i);
+        }
+    }
+
+    @Test
+    public void testEnqueueDequeueSize() {
+        strQueue.enqueue("One");
+        assertEquals(1, strQueue.size());
+        strQueue.enqueue("Two");
+        assertEquals(2, strQueue.size());
+        strQueue.enqueue("Three");
+        assertEquals(3, strQueue.size());
+        strQueue.enqueue("Four");
+        assertEquals(4, strQueue.size());
+        assertEquals("One", strQueue.dequeue());
+        assertEquals(3, strQueue.size());
+        assertEquals("Two", strQueue.dequeue());
+        assertEquals(2, strQueue.size());
+        assertEquals("Three", strQueue.dequeue());
+        assertEquals(1, strQueue.size());
+        assertEquals("Four", strQueue.dequeue());
+        assertEquals(0, strQueue.size());
+    }
+
+    @Test
+    public void testEnqueueDequeueSize2() {
+        //int max = 10;
+        int max = 1000000;
+        for(int i = 0; i < max; i++) {
+            assertEquals(i, intQueue.size());
+            intQueue.enqueue(i);
         }
 
-        for(int i = max - 1; i >= 0; i--){
-            assertEquals(i + 1, queue.size());
-            Integer r = queue.dequeue();
+        for(int i = max - 1; i >= 0; i--) {
+            assertEquals(i + 1, intQueue.size());
+            Integer r = intQueue.dequeue();
             assertEquals((max-1) - i, r.intValue());
         }
     }
 
     @Test
-    public void testEnqueueIsEmptyDequeue(){
-        assertTrue(queue.isEmpty());
-
-        assertEquals(queue, queue.enqueue("hello"));
-        assertFalse(queue.isEmpty());
-
-        assertEquals("hello", queue.dequeue());
-        assertTrue(queue.isEmpty());
-
-        assertEquals(queue, queue.enqueue("hello"));
-        assertFalse(queue.isEmpty());
-
-        assertEquals(queue, queue.enqueue("there"));
-        assertFalse(queue.isEmpty());
-
-        assertEquals(queue, queue.enqueue("world"));
-        assertFalse(queue.isEmpty());
-
-        assertEquals("hello", queue.dequeue());
-        assertFalse(queue.isEmpty());
-
-        assertEquals("there", queue.dequeue());
-        assertFalse(queue.isEmpty());
-
-        assertEquals("world", queue.dequeue());
-        assertTrue(queue.isEmpty());
+    public void testEnqueueDequeuePeekString() {
+        strQueue.enqueue("One");
+        assertEquals("One", strQueue.peek());
+        strQueue.enqueue("Two");
+        assertEquals("One", strQueue.peek());
+        assertEquals("One", strQueue.dequeue());
+        assertEquals("Two", strQueue.peek());
+        strQueue.enqueue("Three").enqueue("Four");
+        assertEquals("Two", strQueue.dequeue());
+        assertEquals("Three", strQueue.dequeue());
+        assertEquals("Four", strQueue.peek());
     }
 
     @Test
-    public void testEnqueueToString(){
-        assertEquals("[]", queue.toString());
+    public void testEnqueueDequeuePeekInteger() {
+        intQueue.enqueue(1);
+        assertEquals(1, intQueue.peek());
+        intQueue.enqueue(2);
+        assertEquals(1, intQueue.peek());
+        assertEquals(1, intQueue.dequeue());
+        assertEquals(2, intQueue.peek());
+        intQueue.enqueue(3).enqueue(4);
+        assertEquals(2, intQueue.dequeue());
+        assertEquals(3, intQueue.dequeue());
+        assertEquals(4, intQueue.peek());
+    }
 
-        queue.enqueue("Hello");
-        assertEquals("[Hello]", queue.toString());
+    @Test
+    public void testEnqueueIsEmptyDequeue() {
+        assertTrue(strQueue.isEmpty());
+
+        assertEquals(strQueue, strQueue.enqueue("hello"));
+        assertFalse(strQueue.isEmpty());
+
+        assertEquals("hello", strQueue.dequeue());
+        assertTrue(strQueue.isEmpty());
+
+        assertEquals(strQueue, strQueue.enqueue("hello"));
+        assertFalse(strQueue.isEmpty());
+
+        assertEquals(strQueue, strQueue.enqueue("there"));
+        assertFalse(strQueue.isEmpty());
+
+        assertEquals(strQueue, strQueue.enqueue("world"));
+        assertFalse(strQueue.isEmpty());
+
+        assertEquals("hello", strQueue.dequeue());
+        assertFalse(strQueue.isEmpty());
+
+        assertEquals("there", strQueue.dequeue());
+        assertFalse(strQueue.isEmpty());
+
+        assertEquals("world", strQueue.dequeue());
+        assertTrue(strQueue.isEmpty());
+    }
+
+    @Test
+    public void testEnqueueToString() {
+        assertEquals("[]", strQueue.toString());
+
+        strQueue.enqueue("Hello");
+        assertEquals("[Hello]", strQueue.toString());
 
         QueueInterface<Integer> queue2 = Configuration.getQueueImplementation();
         queue2.enqueue(1).enqueue(2).enqueue(3);
         assertEquals("[1, 2, 3]", queue2.toString());
 
-        queue.enqueue("World");
-        assertEquals("[Hello, World]", queue.toString());
+        strQueue.enqueue("World");
+        assertEquals("[Hello, World]", strQueue.toString());
     }
 
     @Test
-    public void testNullPointerException(){
+    public void testNullPointerException() {
         assertThrows(NullPointerException.class,
-                () -> queue.enqueue(null),
+                () -> strQueue.enqueue(null),
                 "Trying to enqueue a null value should throw null pointer.");
     }
 
     @Test
-    public void testIllegalStateException1(){
-
+    public void testIllegalStateException1() {
         assertThrows(IllegalStateException.class,
-                () -> queue.dequeue(),
+                () -> strQueue.dequeue(),
                 "Trying to dequeue an empty list should throw illegal state.");
     }
 
     @Test
-    public void testIllegalStateException2(){
-        queue.enqueue("One").enqueue("Two").enqueue("Three");
-        queue.dequeue();
-        queue.dequeue();
-        queue.dequeue();
+    public void testIllegalStateException2() {
+        strQueue.enqueue("One").enqueue("Two").enqueue("Three");
+        strQueue.dequeue();
+        strQueue.dequeue();
+        strQueue.dequeue();
         assertThrows(IllegalStateException.class,
-                () -> queue.dequeue(),
+                () -> strQueue.dequeue(),
                 "Trying to dequeue more than you enqueue should throw illegal state.");
     }
 }
